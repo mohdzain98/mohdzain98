@@ -1,7 +1,7 @@
 - 👋 Hi, I’m @mohdzain98
-- 👀 I’m interested in Data Science,ML,Web development
+- 👀 I’m interested in Web development, Software Developement and Data Science.
 - 🌱 I’m currently learning Data Analytics
-- 💞️ I’m looking to collaborate on ML,Data science projects
+- 💞️ I’m looking to collaborate on Web DE=evelopemnt projects
 - 📫 How to reach me : zainmohd1998@gmail.com linkedin:https://www.linkedin.com/in/zainatlink/
 
 <!---
