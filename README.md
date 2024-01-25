@@ -12,7 +12,7 @@
  - 📫 How to reach me : zainmohd1998@gmail.com linkedin:https://www.linkedin.com/in/zainatlink/
 </div>
 <div>
-<h3 align="left">Languages I know:</h3>
+<h3 align="left">Languages and Tools:</h3>
 <p align="left"> 
 <a href="https://www.java.com/en/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original-wordmark.svg" alt="html5" width="40" height="40"/> </a>
 <a href="https://www.python.org/" target="_blank" rel="noreferrer"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original-wordmark.svg" alt="html5" width="40" height="40"/> </a>
