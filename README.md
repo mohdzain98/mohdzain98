@@ -3,7 +3,7 @@
   
  - 👀 I’m interested in Web development, Software Developement and Data Science.
   
- - 🌱 I’m currently learning JavaScript
+ - 🌱 I’m currently learning about web development
    
  - 💞️ I’m looking to collaborate on Web Developemnt projects
 
