@@ -1,7 +1,7 @@
 <h1 align="center">Hi I am Mohd Zain</h1>
 <div>
   
- - 👀 I’m interested in Web development, Software Developement and Data Science.
+ - 👀 I’m interested in Data Science, Machine Learning and Artificial Intelligence.
   
  - 🌱 I’m currently learning about AI/ML
    
