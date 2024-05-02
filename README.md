@@ -3,9 +3,9 @@
   
  - 👀 I’m interested in Web development, Software Developement and Data Science.
   
- - 🌱 I’m currently learning about web development
+ - 🌱 I’m currently learning about AI/ML
    
- - 💞️ I’m looking to collaborate on Web Developemnt projects
+ - 💞️ I’m looking to collaborate on Machine Learning projects
 
  - ⚡ I am currently enrolled in M.Tech in Mathematics and Computing at **Indian Institute of Technology ISM, Dhanbad**
    
