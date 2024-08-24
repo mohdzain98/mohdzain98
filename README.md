@@ -7,8 +7,10 @@
    
  - 💞️ I’m looking to collaborate on Machine Learning projects
 
- - ⚡ I am currently enrolled in M.Tech in Mathematics and Computing at **Indian Institute of Technology ISM, Dhanbad**
-   
+ - ⚡ I am currently Data Science Intern at **Sigmoid Analytics**
+
+ - ⚡ Previously, completed M.Tech in Mathematics and Computing at **Indian Institute of Technology ISM, Dhanbad**
+  
  - 📫 How to reach me : zainmohd1998@gmail.com linkedin:https://www.linkedin.com/in/zainatlink/
 </div>
 <div>
