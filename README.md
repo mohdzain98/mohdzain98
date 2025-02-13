@@ -33,5 +33,5 @@
 
 <p>&nbsp;<img align="center" src="https://github-readme-stats.vercel.app/api?username=mohdzain98&show_icons=true&locale=en" alt="mohdzain98" /></p>
 
-<p><img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=mohdzain98&" alt="alix47" /></p>
+<p>[![GitHub Streak](https://github-readme-streak-stats.herokuapp.com?user=mohdzain98)](https://git.io/streak-stats)</p>
 
