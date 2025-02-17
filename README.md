@@ -7,7 +7,7 @@
    
  - 💞️ I’m looking to collaborate on Machine Learning projects
 
- - ⚡ I am currently Data Science Intern at **Sigmoid Analytics**
+ - ⚡ I am currently Data Science Trainee at **Sigmoid Analytics**
 
  - ⚡ Previously, completed M.Tech in Mathematics and Computing at **Indian Institute of Technology ISM, Dhanbad**
   
