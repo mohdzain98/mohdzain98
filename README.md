@@ -3,9 +3,9 @@
   
  - 👀 I’m interested in Data Science, Machine Learning and Artificial Intelligence.
   
- - 🌱 I’m currently learning about Large Language Models(LLMs)
+ - 🌱 I’m currently learning about Price and Promotion Non Linear Optimization
    
- - 💞️ I’m looking to collaborate on Machine Learning projects
+ - 💞️ I’m looking to collaborate on Gen AI projects
 
  - ⚡ I am currently Data Science Trainee at **Sigmoid Analytics**
 
