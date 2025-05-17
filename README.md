@@ -3,7 +3,7 @@
   
  - 👀 I’m interested in Data Science, Machine Learning and Artificial Intelligence.
   
- - 🌱 I’m currently learning about Price and Promotion Non Linear Optimization
+ - 🌱 I’m currently working on multi agent orchestration tool for loan origination.
    
  - 💞️ I’m looking to collaborate on Gen AI projects
 
