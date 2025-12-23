@@ -29,9 +29,14 @@
 </p>  
 </div>
 
-<p><img align="left" src="https://github-readme-stats.vercel.app/api/top-langs?username=mohdzain98&show_icons=true&locale=en&layout=compact" alt="mohdzain98" /></p>
+![](http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github)
 
-<p>&nbsp;<img align="center" src="https://github-readme-stats.vercel.app/api?username=mohdzain98&show_icons=true&locale=en" alt="mohdzain98" /></p>
+![](http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mohdzain98&theme=github)
+![](http://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=mohdzain98&theme=github)
+
+![](http://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
+![](http://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=5)
+
 
 <p><img src="https://github-readme-streak-stats.herokuapp.com?user=mohdzain98" alt="GitHub Streak" /></p>
 
