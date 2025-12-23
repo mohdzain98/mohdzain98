@@ -41,6 +41,7 @@
 </p>
 
 <h3 align="left">Github Stats:</h3>
+
 ![](http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github)
 
 ![](http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mohdzain98&theme=github)
