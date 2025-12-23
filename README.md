@@ -3,15 +3,16 @@
   
  - 👀 I’m interested in Data Science, Machine Learning and Artificial Intelligence.
   
- - 🌱 I’m currently working on multi agent orchestration tool for loan origination.
+ - 🌱 I’m currently working on RGMx implementaton for CPG client regarding data refresh and model drift.
    
- - 💞️ I’m looking to collaborate on Gen AI projects
+ - 💞️ I’m looking to collaborate on Gen AI as well as DS projects
 
  - ⚡ I am currently Data Science Trainee at **Sigmoid Analytics**
 
  - ⚡ Previously, completed M.Tech in Mathematics and Computing at **Indian Institute of Technology ISM, Dhanbad**
   
  - 📫 How to reach me : zainmohd1998@gmail.com linkedin:https://www.linkedin.com/in/zainatlink/
+ - 📌 More detaild are here <a href="https://mohdzain.com">mohdzain.com</a>
 </div>
 <div>
 <h3 align="left">Languages and Tools:</h3>
