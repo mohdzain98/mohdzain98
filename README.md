@@ -30,6 +30,17 @@
 </p>  
 </div>
 
+<h3 align="left">AI:</h3>
+<p>
+  <img src="https://img.shields.io/badge/LLM-OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white" />
+  <img src="https://img.shields.io/badge/RAG-VectorDB-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/LangChain-%230b5?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/LangGraph-black?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Multi_Agent_AI-purple?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/MCP-(Model_Context_Protocol)-blueviolet?style=for-the-badge" />
+</p>
+
+<h3 align="left">Github Stats:</h3>
 ![](http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github)
 
 ![](http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mohdzain98&theme=github)
