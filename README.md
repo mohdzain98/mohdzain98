@@ -16,7 +16,7 @@
 </div>
 <div>
 <h3 align="left">Languages and Tools Exposure:</h3>
-<div align="center">
+<div align="left">
 	<table>
 		<tr>
 			<td><code><img width="40" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/html.png" alt="HTML" title="HTML"/></code></td>
