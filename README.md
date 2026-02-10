@@ -51,5 +51,5 @@
 ![](http://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=5)
 
 
-<p><img src="https://github-readme-streak-stats.herokuapp.com?user=mohdzain98" alt="GitHub Streak" /></p>
+![mohdzain98 streak badge](https://github-readme-streak-stats.herokuapp.com?user=mohdzain98&theme=default)
 
