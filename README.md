@@ -7,7 +7,7 @@
    
  - 💞️ I’m looking to collaborate on Gen AI as well as DS projects
 
- - ⚡ I am currently Data Science Trainee at **Sigmoid Analytics**
+ - ⚡ I am currently Data Scientist at **Sigmoid Analytics**
 
  - ⚡ Previously, completed M.Tech in Mathematics and Computing at **Indian Institute of Technology ISM, Dhanbad**
   
