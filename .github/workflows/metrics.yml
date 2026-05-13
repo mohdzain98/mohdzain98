@@ -1,0 +1,34 @@
+name: Metrics
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  github-metrics:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Generate repository metrics
+        uses: lowlighter/metrics@latest
+        with:
+          template: repository
+          filename: metrics.repository.svg
+
+          token: ${{ secrets.METRICS_TOKEN }}
+
+          user: mohdzain98
+          repo: mohdzain98
+
+          plugin_lines: yes
+          plugin_followup: yes
+          plugin_projects: yes
+
+          plugin_projects_repositories: mohdzain98/mohdzain98/projects/1
