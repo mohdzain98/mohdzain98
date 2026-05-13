@@ -58,6 +58,10 @@ jobs:
 
           plugin_languages_details: lines, percentage
           plugin_languages_categories: programming
+          commits_authoring: >-
+            mohdzain98,
+            zainmohd1998@gmail.com,
+            55584600+mohdzain98@users.noreply.github.com
 
           plugin_languages_limit: 4
 
