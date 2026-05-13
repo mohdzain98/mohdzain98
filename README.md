@@ -61,6 +61,8 @@
 ![](http://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
 ![](http://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=5)
 
+![Metrics](./github-metrics.svg)
+
 
 ![mohdzain98 streak badge](https://github-readme-streak-stats.herokuapp.com?user=mohdzain98&theme=default)
 
