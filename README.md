@@ -66,16 +66,10 @@
     <td align="center">
       <b>Repository Size Based</b>
     </td>
-    <td align="center">
-      <b>Actual Lines of Code</b>
-    </td>
   </tr>
   <tr>
     <td>
       <img src="./metrics.plugin.languages.details.svg" width="100%" />
-    </td>
-    <td>
-      <img src="./metrics.plugin.languages.indepth.svg" width="100%" />
     </td>
   </tr>
 </table>
