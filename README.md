@@ -61,7 +61,24 @@
 ![](http://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
 ![](http://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=5)
 
-![Metrics](./metrics.plugin.languages.details.svg)
+<table>
+  <tr>
+    <td align="center">
+      <b>Repository Size Based</b>
+    </td>
+    <td align="center">
+      <b>Actual Lines of Code</b>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <img src="./metrics.plugin.languages.details.svg" width="100%" />
+    </td>
+    <td>
+      <img src="./metrics.plugin.languages.indepth.svg" width="100%" />
+    </td>
+  </tr>
+</table>
 
 
 ![mohdzain98 streak badge](https://github-readme-streak-stats.herokuapp.com?user=mohdzain98&theme=default)
