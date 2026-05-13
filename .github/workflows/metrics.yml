@@ -18,21 +18,27 @@ jobs:
         uses: lowlighter/metrics@latest
         with:
           filename: metrics.plugin.languages.details.svg
-
+    
           token: ${{ secrets.METRICS_TOKEN }}
-
+    
           user: mohdzain98
-
+    
           base: ""
-
+    
           plugin_languages: yes
-
+    
           plugin_languages_ignored: >-
-            jupyter notebook, html, css, tex, less, dockerfile, makefile, qmake, lex, cmake, shell,
-            gnuplot, Hack, PHP
-
-          plugin_languages_details: lines, bytes-size, percentage
+            jupyter notebook, html, css, tex, less,
+            dockerfile, makefile, qmake, lex,
+            cmake, shell, gnuplot, Hack, PHP
+    
+          plugin_languages_aliases: >-
+            tsx:TypeScript
+            jsx:JavaScript
+    
           plugin_languages_categories: programming
-
+    
+          plugin_languages_details: bytes-size, percentage
+    
           plugin_languages_limit: 4
 
