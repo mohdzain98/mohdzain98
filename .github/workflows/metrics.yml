@@ -57,8 +57,15 @@ jobs:
       
           plugin_languages_aliases: >-
             tsx:TypeScript
+            jsx:JavaScript
       
           plugin_languages_indepth: yes
+          
+          plugin_languages_skipped: >-
+            applied-js-project
+            applied-ml-projects
+            bracketsbay
+            techbooks
       
           commits_authoring: >-
             mohdzain98,
