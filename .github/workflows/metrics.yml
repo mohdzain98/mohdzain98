@@ -41,28 +41,36 @@ jobs:
         uses: lowlighter/metrics@latest
         with:
           filename: metrics.plugin.languages.indepth.svg
-
+      
           token: ${{ secrets.METRICS_TOKEN }}
-
+      
           user: mohdzain98
-
+      
           base: ""
-
+      
           plugin_languages: yes
-
+      
           plugin_languages_ignored: >-
-            jupyter notebook, html, css, tex, less, dockerfile, makefile, qmake, lex, cmake, shell,
-            gnuplot, Hack, PHP
-
+            jupyter notebook, html, css, tex, less,
+            dockerfile, makefile, qmake, lex,
+            cmake, shell, gnuplot, Hack, PHP
+      
+          plugin_languages_aliases: >-
+            tsx:TypeScript
+      
           plugin_languages_indepth: yes
-
-          plugin_languages_details: lines, percentage
-          plugin_languages_categories: programming
+      
           commits_authoring: >-
             mohdzain98,
             zainmohd1998@gmail.com,
             55584600+mohdzain98@users.noreply.github.com
-
+      
+          plugin_languages_categories: programming
+      
+          plugin_languages_details: lines, percentage
+      
           plugin_languages_limit: 4
-
-          plugin_languages_analysis_timeout: 15
+      
+          plugin_languages_analysis_timeout: 45
+      
+          plugin_languages_analysis_timeout_repositories: 15
