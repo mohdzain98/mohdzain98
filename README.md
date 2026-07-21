@@ -73,5 +73,5 @@
 </table>
 
 
-![mohdzain98 streak badge](https://github-readme-streak-stats.herokuapp.com?user=mohdzain98&theme=default)
+[![GitHub Streak](https://github-readme-streak-stats.herokuapp.com?user=mohdzain98)](https://git.io/streak-stats)
 
