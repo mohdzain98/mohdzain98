@@ -53,13 +53,11 @@
 
 <h3 align="left">Github Stats:</h3>
 
-![](http://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github)
-
-![](http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mohdzain98&theme=github)
-![](http://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=mohdzain98&theme=github)
-
-![](http://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
-![](http://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=5)
+![](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github)
+![](https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mohdzain98&theme=github&exclude=html%2C+php)
+![](https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=mohdzain98&theme=github&exclude=html%2C+php)
+![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
+![](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=0)
 
 <table>
   <tr>
