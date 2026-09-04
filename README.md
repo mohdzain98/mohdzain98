@@ -39,6 +39,8 @@
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/redis.png" alt="redis" title="redis"/></code>
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/mongodb.png" alt="mongoDB" title="mongoDB"/></code>
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/nginx.png" alt="Nginx" title="Nginx"/></code>
+	<img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/databricks.png" alt="Databricks" title="Databricks"/>
+	<img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/azure.png" alt="Azure" title="Azure"/>
 </div>
 
 <h3 align="left">AI:</h3>
@@ -49,6 +51,7 @@
   <img src="https://img.shields.io/badge/LangGraph-black?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Multi_Agent_AI-purple?style=for-the-badge" />
   <img src="https://img.shields.io/badge/MCP-(Model_Context_Protocol)-blueviolet?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Genie-Databricks-FF3621?style=for-the-badge&logo=databricks&logoColor=white" />
 </p>
 
 <h3 align="left">Github Stats:</h3>
