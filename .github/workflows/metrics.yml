@@ -2,7 +2,9 @@ name: Metrics
 
 on:
   workflow_dispatch:
-  
+  schedule:
+    - cron: "0 0 * * *"   # optional: refresh once a day, remove if you only want manual runs
+
 jobs:
   github-metrics:
     runs-on: ubuntu-latest
@@ -49,11 +51,16 @@ jobs:
           plugin_activity_visibility: public
           plugin_activity_timestamps: yes
 
-          # ── Featured repositories ───────────────────────────────────────
-          plugin_repositories: yes
-          plugin_repositories_featured: >-
-            mohdzain98/docschat,
-            mohdzain98/surfmind
-          plugin_repositories_random: no    # set yes to fill remaining slots randomly
-          plugin_repositories_order: >-
-            featured, pinned
+          # ── Isometric commit calendar ───────────────────────────────────
+          plugin_isocalendar: yes
+          plugin_isocalendar_duration: half-year   # full-year also available
+
+          # ── Habits: most active languages/times from recent commits ────
+          plugin_habits: yes
+          plugin_habits_from: 200          # number of recent commits to analyze
+          plugin_habits_days: 30           # lookback window
+          plugin_habits_facts: yes
+          plugin_habits_charts: yes
+
+          # ── Lines of code added/removed over time ───────────────────────
+          plugin_lines: yes
