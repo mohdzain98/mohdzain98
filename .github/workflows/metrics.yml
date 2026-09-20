@@ -2,6 +2,8 @@ name: Metrics
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"   # optional: refresh once a day, remove if you only want manual runs
 
 jobs:
   github-metrics:
@@ -40,25 +42,15 @@ jobs:
 
           plugin_languages_limit: 4
 
-          # ── Activity feed: recent PRs, issues, commits, releases ───────
-          plugin_activity: yes
-          plugin_activity_limit: 5          # how many events to show
-          plugin_activity_days: 14          # lookback window
-          plugin_activity_filter: >-
-            issue, pr, commit, release
-          plugin_activity_visibility: public
-          plugin_activity_timestamps: yes
+          # NOTE: plugin_activity and plugin_habits are removed — both have
+          # unfixed upstream bugs in lowlighter/metrics that crash on null
+          # actor/author fields from certain events (force-pushes, deleted
+          # or private repos), with no config workaround.
+          # See: https://github.com/Ismadrade/Ismadrade/pull/2
 
           # ── Isometric commit calendar ───────────────────────────────────
           plugin_isocalendar: yes
           plugin_isocalendar_duration: half-year   # full-year also available
-
-          # ── Habits: most active languages/times from recent commits ────
-          plugin_habits: yes
-          plugin_habits_from: 200          # number of recent commits to analyze
-          plugin_habits_days: 30           # lookback window
-          plugin_habits_facts: yes
-          plugin_habits_charts: yes
 
           # ── Lines of code added/removed over time ───────────────────────
           plugin_lines: yes
