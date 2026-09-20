@@ -2,8 +2,6 @@ name: Metrics
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *"   # optional: refresh once a day, remove if you only want manual runs
 
 jobs:
   github-metrics:
