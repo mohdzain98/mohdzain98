@@ -70,7 +70,7 @@
   </tr>
   <tr>
     <td>
-      <img src="./metrics.plugin.languages.details.svg" width="100%" />
+      <img src="./metrics.svg" width="100%" />
     </td>
   </tr>
 </table>
