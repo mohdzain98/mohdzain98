@@ -3,9 +3,9 @@
   
  - 👀 I’m interested in Data Science, Machine Learning and Artificial Intelligence.
   
- - 🌱 I’m currently working on RGMx implementaton for CPG client regarding data refresh and model drift.
+ - 🌱 I’m currently working as an FDE on a use case for a CPG client, end to end from _development_ to _deployment_.
    
- - 💞️ I’m looking to collaborate on Gen AI as well as DS projects
+ - 💞️ I’m looking to collaborate on Gen AI, E2E Agentic AI as well as DS projects
 
  - ⚡ I am currently Data Scientist at **Sigmoid Analytics**
 
@@ -19,6 +19,11 @@
 <div >
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/rest.png" alt="REST" title="REST"/></code>
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/git.png" alt="Git" title="Git"/></code>
+	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/pandas.png" alt="Pandas" title="Pandas"/></code>
+<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/apache_spark.png" alt="Spark" title="Apache Spark"/></code>
+<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/pydantic.png" alt="Pydantic" title="Pydantic"/></code>
+<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/streamlit.png" alt="Streamlit" title="Streamlit"/></code>
+<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/githubactions.png" alt="GitHub Actions" title="GitHub Actions"/></code>
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/github.png" alt="GitHub" title="GitHub"/></code>
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/postman.png" alt="Postman" title="Postman"/></code>
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/jira.png" alt="Jira" title="Jira"/></code>
@@ -39,19 +44,24 @@
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/redis.png" alt="redis" title="redis"/></code>
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/mongodb.png" alt="mongoDB" title="mongoDB"/></code>
 	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/nginx.png" alt="Nginx" title="Nginx"/></code>
+	<code><img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/docker.png" alt="Docker" title="Docker"/></code>
 	<img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/databricks.png" alt="Databricks" title="Databricks"/>
 	<img width="30" src="https://raw.githubusercontent.com/marwin1991/profile-technology-icons/refs/heads/main/icons/microsoft_azure.png" alt="Azure" title="Azure"/>
 </div>
 
 <h3 align="left">AI:</h3>
 <p>
-  <img src="https://img.shields.io/badge/LLM-OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white" />
-  <img src="https://img.shields.io/badge/RAG-VectorDB-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/LangChain-%230b5?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/LangGraph-black?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Multi_Agent_AI-purple?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/MCP-(Model_Context_Protocol)-blueviolet?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Genie-Databricks-FF3621?style=for-the-badge&logo=databricks&logoColor=white" />
+	<img src="https://img.shields.io/badge/Anthropic-Claude-D97757?style=for-the-badge&logo=anthropic&logoColor=white" />
+	<img src="https://img.shields.io/badge/Azure_OpenAI-0078D4?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/Agentic_AI-8A2BE2?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/RAG-VectorDB-blue?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/Azure_AI_Search-0078D4?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/pgvector-336791?style=for-the-badge&logo=postgresql&logoColor=white" />
+	<img src="https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white" />
+	<img src="https://img.shields.io/badge/LangGraph-1C3C3C?style=for-the-badge&logo=langgraph&logoColor=white" />
+	<img src="https://img.shields.io/badge/Langfuse-E11D48?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/MCP-Model_Context_Protocol-blueviolet?style=for-the-badge&logo=modelcontextprotocol&logoColor=white" />
+	<img src="https://img.shields.io/badge/Genie-Databricks-FF3621?style=for-the-badge&logo=databricks&logoColor=white" />
 </p>
 
 <h3 align="left">Github Stats:</h3>
