@@ -72,19 +72,14 @@
 ![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
 ![](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=0)
 
-<table>
-  <tr>
-    <td width="50%" valign="top"><img src="./cards/language-journey.svg" width="100%" alt="Language journey: commits per year by language" /></td>
-    <td width="50%" valign="top"><img src="./cards/commit-visibility.svg" width="100%" alt="Public vs private commits by language" /></td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top" align="center">
-      <b>Repository Size Based</b><br/>
-      <img src="./metrics.svg" width="100%" alt="Repository size based metrics" />
-    </td>
-    <td width="50%" valign="top"><img src="./cards/active-repos.svg" width="100%" alt="Most active repos in the last 90 days" /></td>
-  </tr>
-</table>
+<p align="left">
+  <img src="./cards/language-journey.svg" width="49%" align="top" alt="Language journey: commits per year by language" />
+  <img src="./cards/commit-visibility.svg" width="49%" align="top" alt="Public vs private commits by language" />
+</p>
+<p align="left">
+  <img src="./metrics.svg" width="49%" align="top" alt="Repository size based metrics" title="Repository size based" />
+  <img src="./cards/active-repos.svg" width="49%" align="top" alt="Most active repos in the last 90 days" />
+</p>
 
 
 <!-- <div align="left"> -->
