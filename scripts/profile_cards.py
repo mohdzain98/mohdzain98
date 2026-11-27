@@ -187,6 +187,8 @@ def style_block() -> str:
         ".m{font-size:11px;fill:var(--t2)}"
         ".v{font-size:11px;font-weight:600;fill:var(--t1)}"
         ".g{stroke:var(--gr);stroke-width:1}"
+        ".pn{font-size:17px;font-weight:700;fill:#ffffff;paint-order:stroke;"
+        "stroke:rgba(0,0,0,.28);stroke-width:2.5px;stroke-linejoin:round}"
         "</style>"
     )
 
@@ -574,41 +576,35 @@ def pie_slice(cx: float, cy: float, r: float, start: float, end: float) -> str:
 
 
 def render_repo_languages(owned: list[dict], ranked: list[str]) -> str:
-    """Pie of the top 5 primary languages across repos the user owns (no forks).
+    """Big pie of the top 5 primary languages across repos the user owns (no forks).
 
-    Slices carry no text; the legend lists public | private repo counts.
+    Each slice carries only its repo count; a compact legend sits underneath.
     """
-    counts: dict[str, Counter] = defaultdict(Counter)
-    for repo in owned:
-        lang = (repo["primaryLanguage"] or {}).get("name")
-        if lang:
-            counts[lang]["private" if repo["isPrivate"] else "public"] += 1
-    top = sorted(counts, key=lambda l: (-sum(counts[l].values()), l))[:5]
-    total = sum(sum(counts[l].values()) for l in top) or 1
+    counts = Counter((r["primaryLanguage"] or {}).get("name") for r in owned)
+    counts.pop(None, None)
+    top = sorted(counts, key=lambda l: (-counts[l], l))[:5]
+    total = sum(counts[l] for l in top) or 1
 
     width, height = 320, 340
-    cx, cy, r = width / 2, 140, 62
+    cx, cy, r = width / 2, 172, 104
     body, angle = [], 0.0
     for lang in top:
-        sweep = 2 * math.pi * sum(counts[lang].values()) / total
+        sweep = 2 * math.pi * counts[lang] / total
         body.append(f'<path d="{pie_slice(cx, cy, r, angle, angle + sweep)}" '
                     f'style="fill:{color(lang, ranked)};stroke:var(--bg);stroke-width:2;stroke-linejoin:round"/>')
+        mid, dist = angle + sweep / 2, r * (0.62 if sweep > 0.6 else 0.72)
+        tx, ty = cx + dist * math.sin(mid), cy - dist * math.cos(mid)
+        body.append(f'<text class="pn" x="{tx:.1f}" y="{ty + 6:.1f}" text-anchor="middle">{counts[lang]}</text>')
         angle += sweep
 
-    y = 228
-    body.append(f'<text class="m" x="{width - 20}" y="{y}" text-anchor="end">public | private</text>')
-    for i, lang in enumerate(top):
-        ry = y + 20 + i * 19
-        pub, priv = counts[lang]["public"], counts[lang]["private"]
-        body.append(f'<rect x="20" y="{ry - 9}" width="10" height="10" rx="2" style="fill:{color(lang, ranked)}"/>')
-        body.append(f'<text class="l" x="36" y="{ry}">{escape(lang)}</text>')
-        body.append(f'<text class="v" x="{width - 20}" y="{ry}" text-anchor="end">{pub}'
-                    f'<tspan class="m" font-weight="400"> | </tspan>{priv}</text>')
+    leg_items = [(lang, color(lang, ranked)) for lang in top]
+    for row, items in enumerate((leg_items[:3], leg_items[3:])):  # two centered rows
+        row_w = sum(15 + len(l) * 6.0 + 12 for l, _ in items) - 12
+        body.append(legend(items, (width - row_w) / 2, 298 + row * 18, width)[0])
 
-    n_repos = sum(sum(c.values()) for c in counts.values())
+    n_repos = sum(counts.values())
     subtitle = f"Top 5 · {n_repos} own repos · forks excluded"
     return frame(width, height, "Top Languages by Repo", subtitle, "".join(body))
-
 
 def main() -> None:
     """Fetch repos and commits once, then write every card to the output directory."""
