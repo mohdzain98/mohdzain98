@@ -24,6 +24,7 @@ ACTIVE_DAYS = 90
 MAX_LANGS = 6
 MAX_ACTIVE_ROWS = 6
 GAP = 2  # surface gap between adjacent fills
+CARD_W = 480  # matches metrics.svg so cards pair up in a 2-column README grid
 FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
 
 # Validated categorical palette; slot order is the colorblind-safety mechanism.
@@ -202,14 +203,20 @@ def frame(width: int, height: int, title: str, subtitle: str, body: str) -> str:
     )
 
 
-def legend(items: list[tuple[str, str]], x: float, y: float) -> str:
-    """Render a single-row legend of (label, fill) swatches starting at x."""
-    parts = []
+def legend(items: list[tuple[str, str]], x: float, y: float, max_x: float) -> tuple[str, float]:
+    """Render (label, fill) swatches from x, wrapping to a new line past max_x.
+
+    Returns the SVG and the extra height used by wrapped lines.
+    """
+    parts, start, extra = [], x, 0.0
     for label, fill in items:
-        parts.append(f'<rect x="{x}" y="{y - 9}" width="10" height="10" rx="2" style="fill:{fill}"/>')
-        parts.append(f'<text class="m" x="{x + 15}" y="{y}">{escape(label)}</text>')
-        x += 15 + len(label) * 6.2 + 16
-    return "".join(parts)
+        item_w = 15 + len(label) * 6.0 + 12
+        if x + item_w > max_x and x > start:
+            x, extra = start, extra + 18
+        parts.append(f'<rect x="{x:.1f}" y="{y + extra - 9}" width="10" height="10" rx="2" style="fill:{fill}"/>')
+        parts.append(f'<text class="m" x="{x + 15:.1f}" y="{y + extra}">{escape(label)}</text>')
+        x += item_w
+    return "".join(parts), extra
 
 
 def bar_up(x: float, y: float, w: float, h: float, fill: str, rounded: bool) -> str:
@@ -263,14 +270,16 @@ def render_journey(commits: list[Commit], ranked: list[str]) -> str:
         per_year[c.when.year][bucket(c.language, ranked)] += 1
     order = ranked + (["Other"] if any(per_year[y]["Other"] for y in years) else [])
 
-    width, height = 640, 320
-    left, right, top, bottom = 52, width - 24, 96, height - 34
+    width = CARD_W
+    legend_svg, extra = legend([(lang, color(lang, ranked)) for lang in order], 20, 74, width - 16)
+    height = 320 + int(extra)
+    left, right, top, bottom = 44, width - 16, 96 + extra, height - 34
     step, axis_top = nice_scale(max((sum(per_year[y].values()) for y in years), default=1))
     scale = (bottom - top) / axis_top
     band = (right - left) / len(years)
     bar_w = min(38.0, band * 0.6)
 
-    body = [legend([(lang, color(lang, ranked)) for lang in order], 20, 74)]
+    body = [legend_svg]
     for tick in range(0, axis_top + 1, step):
         y = bottom - tick * scale
         body.append(f'<line class="g" x1="{left}" x2="{right}" y1="{y:.1f}" y2="{y:.1f}"/>')
@@ -285,7 +294,7 @@ def render_journey(commits: list[Commit], ranked: list[str]) -> str:
                         f'text-anchor="middle">{total:,}</text>')
         body.append(f'<text class="m" x="{cx:.1f}" y="{bottom + 18}" text-anchor="middle">{year}</text>')
 
-    subtitle = f"{len(commits):,} commits since {first} · grouped by repo primary language"
+    subtitle = f"{len(commits):,} commits since {first} · by repo primary language"
     return frame(width, height, "Language Journey", subtitle, "".join(body))
 
 
@@ -298,13 +307,13 @@ def render_visibility(commits: list[Commit], ranked: list[str]) -> str:
     public = sum(counts[l]["public"] for l in rows)
     private = sum(counts[l]["private"] for l in rows)
 
-    width, row_h, top = 640, 30, 90
+    width, row_h, top = CARD_W, 30, 90
     height = top + len(rows) * row_h + 14
-    x0, x1 = 130, width - 130
+    x0, x1 = 104, width - 118
     scale = (x1 - x0) / max((sum(counts[l].values()) for l in rows), default=1)
     fills = {"public": "var(--pub)", "private": "var(--pri)"}
 
-    body = [legend([("Public", fills["public"]), ("Private", fills["private"])], 20, 74)]
+    body = [legend([("Public", fills["public"]), ("Private", fills["private"])], 20, 74, width - 16)[0]]
     for i, lang in enumerate(rows):
         y = top + i * row_h
         pub, priv = counts[lang]["public"], counts[lang]["private"]
@@ -316,7 +325,7 @@ def render_visibility(commits: list[Commit], ranked: list[str]) -> str:
         body.append(f'<text class="v" x="{end:.1f}" y="{y + 14}">{pub + priv:,}'
                     f'<tspan class="m" font-weight="400">{note}</tspan></text>')
 
-    subtitle = f"{public:,} public · {private:,} private commits · private repo names never shown"
+    subtitle = f"{public:,} public · {private:,} private commits · private names hidden"
     return frame(width, height, "Commits by Visibility", subtitle, "".join(body))
 
 
@@ -335,9 +344,9 @@ def render_active(commits: list[Commit], ranked: list[str]) -> str:
         rows.append((f"Private repos ({n_private_repos})", len(private), top_lang))
         rows.sort(key=lambda r: -r[1])
 
-    width, row_h, top = 640, 30, 74
+    width, row_h, top = CARD_W, 30, 74
     height = top + max(len(rows), 1) * row_h + 14
-    x0, x1 = 250, width - 150
+    x0, x1 = 214, width - 112
     scale = (x1 - x0) / max((r[1] for r in rows), default=1)
 
     body = []
@@ -345,7 +354,7 @@ def render_active(commits: list[Commit], ranked: list[str]) -> str:
         body.append(f'<text class="m" x="20" y="{top + 14}">No commits in the last {ACTIVE_DAYS} days</text>')
     for i, (name, n, lang) in enumerate(rows):
         y = top + i * row_h
-        label = name if len(name) <= 32 else name[:31] + "…"
+        label = name if len(name) <= 30 else name[:29] + "…"
         body.append(f'<text class="l" x="20" y="{y + 14}">{escape(label)}</text>')
         body.append(bar_right(x0, y + 2, max(n * scale, 1.0), 16, color(lang, ranked), True))
         body.append(f'<text class="v" x="{x0 + n * scale + 8:.1f}" y="{y + 14}">{n:,}'
