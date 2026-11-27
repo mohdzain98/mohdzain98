@@ -187,8 +187,9 @@ def style_block() -> str:
         ".m{font-size:11px;fill:var(--t2)}"
         ".v{font-size:11px;font-weight:600;fill:var(--t1)}"
         ".g{stroke:var(--gr);stroke-width:1}"
-        ".pn{font-size:17px;font-weight:700;fill:#ffffff;paint-order:stroke;"
-        "stroke:rgba(0,0,0,.28);stroke-width:2.5px;stroke-linejoin:round}"
+        ".pn,.pl{fill:#ffffff;paint-order:stroke;stroke:rgba(0,0,0,.3);stroke-width:2.5px;stroke-linejoin:round}"
+        ".pn{font-size:15px;font-weight:700}.pl{font-size:11px;font-weight:600}"
+        ".ld{fill:none;stroke:var(--t2);stroke-width:1}.ldot{fill:var(--t1)}"
         "</style>"
     )
 
@@ -578,33 +579,47 @@ def pie_slice(cx: float, cy: float, r: float, start: float, end: float) -> str:
 def render_repo_languages(owned: list[dict], ranked: list[str]) -> str:
     """Big pie of the top 5 primary languages across repos the user owns (no forks).
 
-    Each slice carries only its repo count; a compact legend sits underneath.
+    Slices are labelled "name / public | private" inside; thin slices get an
+    outside label joined by a connector line. No legend.
     """
-    counts = Counter((r["primaryLanguage"] or {}).get("name") for r in owned)
-    counts.pop(None, None)
-    top = sorted(counts, key=lambda l: (-counts[l], l))[:5]
-    total = sum(counts[l] for l in top) or 1
+    counts: dict[str, Counter] = defaultdict(Counter)
+    for repo in owned:
+        lang = (repo["primaryLanguage"] or {}).get("name")
+        if lang:
+            counts[lang]["private" if repo["isPrivate"] else "public"] += 1
+    size = {lang: sum(c.values()) for lang, c in counts.items()}
+    top = sorted(size, key=lambda l: (-size[l], l))[:5]
+    total = sum(size[l] for l in top) or 1
 
     width, height = 320, 340
-    cx, cy, r = width / 2, 172, 104
-    body, angle = [], 0.0
+    cx, cy, r = width / 2, 196, 96
+    slices, labels, angle = [], [], 0.0
     for lang in top:
-        sweep = 2 * math.pi * counts[lang] / total
-        body.append(f'<path d="{pie_slice(cx, cy, r, angle, angle + sweep)}" '
-                    f'style="fill:{color(lang, ranked)};stroke:var(--bg);stroke-width:2;stroke-linejoin:round"/>')
-        mid, dist = angle + sweep / 2, r * (0.62 if sweep > 0.6 else 0.72)
-        tx, ty = cx + dist * math.sin(mid), cy - dist * math.cos(mid)
-        body.append(f'<text class="pn" x="{tx:.1f}" y="{ty + 6:.1f}" text-anchor="middle">{counts[lang]}</text>')
+        sweep = 2 * math.pi * size[lang] / total
+        mid = angle + sweep / 2
+        sx, sy = math.sin(mid), -math.cos(mid)
+        nums = f'{counts[lang]["public"]} | {counts[lang]["private"]}'
+        slices.append(f'<path d="{pie_slice(cx, cy, r, angle, angle + sweep)}" '
+                      f'style="fill:{color(lang, ranked)};stroke:var(--bg);stroke-width:2;stroke-linejoin:round"/>')
+        if sweep >= 0.9:  # wide enough to hold the label inside
+            tx, ty = cx + r * 0.58 * sx, cy + r * 0.58 * sy
+            labels.append(f'<text class="pl" x="{tx:.1f}" y="{ty - 3:.1f}" text-anchor="middle">{escape(lang)}</text>'
+                          f'<text class="pn" x="{tx:.1f}" y="{ty + 14:.1f}" text-anchor="middle">{nums}</text>')
+        else:
+            x0, y0 = cx + (r - 6) * sx, cy + (r - 6) * sy
+            x1, y1 = cx + (r + 14) * sx, cy + (r + 14) * sy
+            side = 1 if sx >= 0 else -1
+            x2 = x1 + 16 * side
+            anchor = "start" if side > 0 else "end"
+            labels.append(f'<polyline class="ld" points="{x0:.1f},{y0:.1f} {x1:.1f},{y1:.1f} {x2:.1f},{y1:.1f}"/>'
+                          f'<circle cx="{x0:.1f}" cy="{y0:.1f}" r="2" class="ldot"/>'
+                          f'<text class="l" x="{x2 + 4 * side:.1f}" y="{y1 + 4:.1f}" text-anchor="{anchor}">'
+                          f'{escape(lang)} <tspan class="v">{nums}</tspan></text>')
         angle += sweep
 
-    leg_items = [(lang, color(lang, ranked)) for lang in top]
-    for row, items in enumerate((leg_items[:3], leg_items[3:])):  # two centered rows
-        row_w = sum(15 + len(l) * 6.0 + 12 for l, _ in items) - 12
-        body.append(legend(items, (width - row_w) / 2, 298 + row * 18, width)[0])
-
-    n_repos = sum(counts.values())
-    subtitle = f"Top 5 · {n_repos} own repos · forks excluded"
-    return frame(width, height, "Top Languages by Repo", subtitle, "".join(body))
+    n_repos = sum(size.values())
+    subtitle = f"Top 5 · {n_repos} own repos · public | private · forks excluded"
+    return frame(width, height, "Top Languages by Repo", subtitle, "".join(slices + labels))
 
 def main() -> None:
     """Fetch repos and commits once, then write every card to the output directory."""
