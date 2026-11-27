@@ -66,7 +66,7 @@
 
 <h3 align="left">Github Stats:</h3>
 
-![](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github)
+![](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github&animation=load&duration=1&name=Mohd+Zain)
 ![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
 ![](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&animation=sequence&timeZone=Asia%2FKolkata)
 
