@@ -68,7 +68,7 @@
 
 ![](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github)
 ![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
-![](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=0)
+![](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&animation=sequence&timeZone=Asia%2FKolkata)
 
 <p align="left">
   <img src="./cards/language-journey.svg" width="49%" align="top" alt="Language journey: commits per year by language" />
