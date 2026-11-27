@@ -67,8 +67,6 @@
 <h3 align="left">Github Stats:</h3>
 
 ![](https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=mohdzain98&theme=github)
-![](https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=mohdzain98&theme=github&exclude=html%2C+php)
-![](https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=mohdzain98&theme=github&exclude=html%2C+php)
 ![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
 ![](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=0)
 
@@ -79,6 +77,10 @@
 <p align="left">
   <img src="./metrics.svg" width="49%" align="top" alt="Repository size based metrics" title="Repository size based" />
   <img src="./cards/active-repos.svg" width="49%" align="top" alt="Most active repos in the last 90 days" />
+</p>
+<p align="left">
+  <img src="./cards/repo-constellation.svg" width="66%" align="top" alt="Repo constellation: every repo as a star, lit in order of first commit" />
+  <img src="./cards/repo-languages.svg" width="32.5%" align="top" alt="Top 5 languages by repo, public and private counts" />
 </p>
 
 
