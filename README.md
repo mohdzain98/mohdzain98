@@ -72,6 +72,12 @@
 ![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=mohdzain98&theme=github)
 ![](https://github-profile-summary-cards.vercel.app/api/cards/productive-time?username=mohdzain98&theme=github&utcOffset=0)
 
+<p align="left">
+  <img src="./cards/language-journey.svg" alt="Language journey: commits per year by language" />
+  <img src="./cards/commit-visibility.svg" alt="Public vs private commits by language" />
+  <img src="./cards/active-repos.svg" alt="Most active repos in the last 90 days" />
+</p>
+
 <table>
   <tr>
     <td align="center">

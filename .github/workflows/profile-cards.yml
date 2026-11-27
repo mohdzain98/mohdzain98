@@ -1,0 +1,33 @@
+name: Profile Cards
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-cards:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Needs a token with `repo` scope so private repos are counted
+      # (only totals are rendered; private repo names never appear).
+      - name: Generate cards
+        run: python scripts/profile_cards.py cards
+        env:
+          GH_STATS_TOKEN: ${{ secrets.METRICS_TOKEN }}
+
+      - name: Commit cards
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add cards
+          git diff --cached --quiet || git commit -m "Update profile cards - [Skip GitHub Action]"
+          git push
