@@ -22,6 +22,11 @@ jobs:
 
           base: ""
 
+          # Card frame so this matches the self-generated cards in the README grid
+          extras_css: >-
+            .items-wrapper{box-sizing:border-box;margin:1px;padding:6px 8px;border:1px solid #d0d7de;border-radius:6px;background:#fff}
+            @media (prefers-color-scheme:dark){.items-wrapper{border-color:#30363d;background:#0d1117}}
+
           # ── Languages (existing plugin, unchanged) ─────────────────────
           plugin_languages: yes
 
