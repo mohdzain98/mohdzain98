@@ -83,7 +83,7 @@ query($owner: String!, $name: String!, $author: ID!, $cursor: String) {
     defaultBranchRef { target { ... on Commit {
       history(first: 100, after: $cursor, author: {id: $author}) {
         pageInfo { hasNextPage endCursor }
-        nodes { oid authoredDate }
+        nodes { oid authoredDate parents { totalCount } }
       }
     } } }
   }
@@ -105,6 +105,7 @@ class Commit:
     private: bool
     langs: dict[str, float] = field(default_factory=dict)
     lines: dict[str, list[int]] = field(default_factory=dict)  # lang -> [added, deleted]
+    merge: bool = False
 
 
 def graphql(token: str, query: str, variables: dict | None = None) -> dict:
@@ -162,7 +163,8 @@ def fetch_commits(token: str, repos: list[dict], author_id: str) -> list[Commit]
                     continue
                 seen.add(node["oid"])
                 when = datetime.fromisoformat(node["authoredDate"].replace("Z", "+00:00"))
-                commits.append(Commit(node["oid"], when, repo["nameWithOwner"], language, repo["isPrivate"]))
+                commits.append(Commit(node["oid"], when, repo["nameWithOwner"], language, repo["isPrivate"],
+                                      merge=node["parents"]["totalCount"] > 1))
             if not history["pageInfo"]["hasNextPage"]:
                 break
             cursor = history["pageInfo"]["endCursor"]
@@ -234,7 +236,9 @@ def attach_file_languages(token: str, commits: list[Commit]) -> list[Commit]:
     for c in commits:
         stats = cache.get(c.oid) or {}
         weights = line_weights(stats) or {c.language: 1.0}
-        out.append(replace(c, langs=without_ignored(weights), lines={l: v[:2] for l, v in stats.items()}))
+        # A merge commit's diff repeats the whole PR, already counted in its own commits.
+        lines = {} if c.merge else {l: v[:2] for l, v in stats.items()}
+        out.append(replace(c, langs=without_ignored(weights), lines=lines))
     return out
 
 
