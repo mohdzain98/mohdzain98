@@ -14,14 +14,36 @@ import math
 import os
 import re
 import sys
+import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
 
 API_URL = "https://api.github.com/graphql"
+REST_URL = "https://api.github.com"
+CACHE_PATH = Path(os.environ.get("COMMIT_LANG_CACHE", ".cache/commit-languages.json"))
+
+# File extension -> Linguist language name, for per-commit language attribution.
+EXT_LANG = {
+    ".py": "Python", ".pyi": "Python", ".ipynb": "Jupyter Notebook", ".rs": "Rust",
+    ".ts": "TypeScript", ".tsx": "TypeScript", ".mts": "TypeScript", ".cts": "TypeScript",
+    ".js": "JavaScript", ".jsx": "JavaScript", ".mjs": "JavaScript", ".cjs": "JavaScript",
+    ".java": "Java", ".kt": "Kotlin", ".kts": "Kotlin", ".go": "Go", ".rb": "Ruby", ".php": "PHP",
+    ".c": "C", ".h": "C", ".cpp": "C++", ".cc": "C++", ".cxx": "C++", ".hpp": "C++", ".cs": "C#",
+    ".swift": "Swift", ".dart": "Dart", ".scala": "Scala", ".lua": "Lua", ".r": "R",
+    ".ex": "Elixir", ".exs": "Elixir", ".zig": "Zig", ".sol": "Solidity",
+    ".html": "HTML", ".htm": "HTML", ".css": "CSS", ".scss": "SCSS", ".sass": "Sass", ".less": "Less",
+    ".vue": "Vue", ".svelte": "Svelte", ".astro": "Astro", ".sh": "Shell", ".bash": "Shell", ".zsh": "Shell",
+    ".sql": "SQL", ".tf": "HCL",
+}
+NAME_LANG = {"Dockerfile": "Dockerfile", "Makefile": "Makefile"}
+# Languages left out of the commit-based cards entirely.
+IGNORED_LANGS = {"CSS", "PHP"}
+SKIP_PATH_PARTS = ("node_modules/", "vendor/", "dist/", "build/", ".next/", "site-packages/", ".min.")
 ACTIVE_DAYS = 90
 MAX_LANGS = 6
 MAX_ACTIVE_ROWS = 6
@@ -30,8 +52,8 @@ CARD_W = 480  # matches metrics.svg so cards pair up in a 2-column README grid
 FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
 
 # Validated categorical palette; slot order is the colorblind-safety mechanism.
-PALETTE_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300"]
-PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#0ca30c"]
+PALETTE_LIGHT = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
+PALETTE_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#0ca30c", "#9085e9", "#e66767"]
 OTHER_LIGHT, OTHER_DARK = "#9a9893", "#6f6e69"
 # Visibility card: one violet hue, split by lightness (no clash with language slots).
 PUBLIC_LIGHT, PRIVATE_LIGHT = "#4a3aa7", "#a99ff0"
@@ -66,8 +88,8 @@ query($owner: String!, $name: String!, $author: ID!, $cursor: String) {
 class Commit:
     """One authored commit, tagged with metadata from the repo it lives in.
 
-    The language is the repo's primary language as computed by Linguist,
-    not the languages of the files the commit touched.
+    `language` is the repo's primary language; `langs` splits the commit across
+    the languages of the files it changed (weights sum to 1).
     """
 
     oid: str
@@ -75,6 +97,7 @@ class Commit:
     repo: str
     language: str
     private: bool
+    langs: dict[str, float] = field(default_factory=dict)
 
 
 def graphql(token: str, query: str, variables: dict | None = None) -> dict:
@@ -139,12 +162,78 @@ def fetch_commits(token: str, repos: list[dict], author_id: str) -> list[Commit]
     return commits
 
 
+def file_language(path: str) -> str | None:
+    """Linguist-style language for a changed file, or None for docs/data/generated files."""
+    if any(part in path for part in SKIP_PATH_PARTS):
+        return None
+    name = path.rsplit("/", 1)[-1]
+    if name in NAME_LANG:
+        return NAME_LANG[name]
+    return EXT_LANG.get(os.path.splitext(name)[1].lower())
+
+
+def commit_file_languages(token: str, repo: str, oid: str) -> dict[str, float] | None:
+    """Split one commit across languages, weighted by lines changed per file.
+
+    Returns {} when no code file changed, or None on an API error (not cached).
+    """
+    req = urllib.request.Request(
+        f"{REST_URL}/repos/{repo}/commits/{oid}",
+        headers={"Authorization": f"bearer {token}", "User-Agent": "profile-cards",
+                 "Accept": "application/vnd.github+json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            files = json.load(resp).get("files", [])
+    except (urllib.error.URLError, TimeoutError):
+        return None
+    weights: Counter = Counter()
+    for f in files:
+        lang = file_language(f["filename"])
+        if lang:
+            weights[lang] += max(f.get("additions", 0) + f.get("deletions", 0), 1)
+    total = sum(weights.values())
+    return {lang: w / total for lang, w in weights.items()} if total else {}
+
+
+def attach_file_languages(token: str, commits: list[Commit]) -> list[Commit]:
+    """Fill each commit's `langs` from its changed files, using an on-disk cache.
+
+    Commits without code changes fall back to the repo language; ignored languages
+    are removed, so a CSS/PHP-only commit ends up with no languages at all.
+    """
+    cache: dict[str, dict[str, float]] = {}
+    if CACHE_PATH.exists():
+        cache = json.loads(CACHE_PATH.read_text())
+    missing = [c for c in commits if c.oid not in cache]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = pool.map(lambda c: (c.oid, commit_file_languages(token, c.repo, c.oid)), missing)
+        for oid, langs in results:
+            if langs is not None:
+                cache[oid] = langs
+    CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    CACHE_PATH.write_text(json.dumps(cache, separators=(",", ":")))
+    print(f"File languages: {len(missing):,} fetched, {len(commits) - len(missing):,} from cache")
+    return [replace(c, langs=without_ignored(cache.get(c.oid) or {c.language: 1.0})) for c in commits]
+
+
+def without_ignored(langs: dict[str, float]) -> dict[str, float]:
+    """Drop IGNORED_LANGS and rescale the rest to sum to 1 ({} if nothing is left)."""
+    kept = {lang: w for lang, w in langs.items() if lang not in IGNORED_LANGS}
+    total = sum(kept.values())
+    return {lang: w / total for lang, w in kept.items()} if total else {}
+
+
 def rank_languages(commits: list[Commit]) -> list[str]:
-    """Return the top languages by commit count, most first.
+    """Return the top languages by file-weighted commit count, most first.
 
     "Other" (no detected language) is never ranked; it is folded in later.
     """
-    counts = Counter(c.language for c in commits if c.language != "Other")
+    counts: Counter = Counter()
+    for c in commits:
+        for lang, w in c.langs.items():
+            if lang != "Other":
+                counts[lang] += w
     return [lang for lang, _ in counts.most_common(MAX_LANGS)]
 
 
@@ -153,9 +242,20 @@ def bucket(language: str, ranked: list[str]) -> str:
     return language if language in ranked else "Other"
 
 
+# Colors follow the language, never its rank, so cards stay consistent as rankings shift.
+PINNED_SLOTS = {"TypeScript": 0, "Python": 1, "HTML": 2, "JavaScript": 3, "PHP": 4}
+
+
 def color(language: str, ranked: list[str]) -> str:
-    """CSS fill for a language's fixed categorical slot."""
-    return f"var(--s{ranked.index(language)})" if language in ranked else "var(--so)"
+    """CSS fill for a language: pinned slot if it has one, else the next free slot."""
+    if language not in ranked:
+        return "var(--so)"
+    if language in PINNED_SLOTS:
+        return f"var(--s{PINNED_SLOTS[language]})"
+    taken = set(PINNED_SLOTS.values())  # reserved even when absent, so colors never shift
+    free = [i for i in range(len(PALETTE_LIGHT)) if i not in taken]
+    unpinned = [l for l in ranked if l not in PINNED_SLOTS]
+    return f"var(--s{free[unpinned.index(language)]})"
 
 
 def nice_scale(max_value: int, ticks: int = 4) -> tuple[int, int]:
@@ -265,20 +365,21 @@ def stacked_segments(values: list[tuple[int, str]], start: float, scale: float,
 
 
 def render_journey(commits: list[Commit], ranked: list[str]) -> str:
-    """Stacked column per year: commits split by repo primary language."""
+    """Stacked column per year: commits split by the languages of files changed."""
     now = datetime.now(timezone.utc)
     first = min((c.when.year for c in commits), default=now.year)
     years = list(range(first, now.year + 1))
     per_year: dict[int, Counter] = defaultdict(Counter)
     for c in commits:
-        per_year[c.when.year][bucket(c.language, ranked)] += 1
+        for lang, w in c.langs.items():
+            per_year[c.when.year][bucket(lang, ranked)] += w
     order = ranked + (["Other"] if any(per_year[y]["Other"] for y in years) else [])
 
     width = CARD_W
     legend_svg, extra = legend([(lang, color(lang, ranked)) for lang in order], 20, 74, width - 16)
     height = 320 + int(extra)
     left, right, top, bottom = 44, width - 16, 96 + extra, height - 34
-    step, axis_top = nice_scale(max((sum(per_year[y].values()) for y in years), default=1))
+    step, axis_top = nice_scale(math.ceil(max((sum(per_year[y].values()) for y in years), default=1)))
     scale = (bottom - top) / axis_top
     band = (right - left) / len(years)
     bar_w = min(38.0, band * 0.6)
@@ -295,10 +396,11 @@ def render_journey(commits: list[Commit], ranked: list[str]) -> str:
         body.append(stacked_segments(segs, bottom, scale, False, cx - bar_w / 2, bar_w))
         if total:
             body.append(f'<text class="v" x="{cx:.1f}" y="{bottom - total * scale - 6:.1f}" '
-                        f'text-anchor="middle">{total:,}</text>')
+                        f'text-anchor="middle">{round(total):,}</text>')
         body.append(f'<text class="m" x="{cx:.1f}" y="{bottom + 18}" text-anchor="middle">{year}</text>')
 
-    subtitle = f"{len(commits):,} commits since {first} · by repo primary language"
+    counted = sum(1 for c in commits if c.langs)
+    subtitle = f"{counted:,} commits since {first} · by languages of files changed"
     return frame(width, height, "Language Journey", subtitle, "".join(body))
 
 
@@ -306,14 +408,15 @@ def render_visibility(commits: list[Commit], ranked: list[str]) -> str:
     """Horizontal stacked bars per language: public vs private commits."""
     counts: dict[str, Counter] = defaultdict(Counter)
     for c in commits:
-        counts[bucket(c.language, ranked)]["private" if c.private else "public"] += 1
-    rows = [lang for lang in ranked + ["Other"] if counts[lang]]
-    public = sum(counts[l]["public"] for l in rows)
-    private = sum(counts[l]["private"] for l in rows)
+        for lang, w in c.langs.items():
+            counts[bucket(lang, ranked)]["private" if c.private else "public"] += w
+    rows = [lang for lang in ranked + ["Other"] if round(sum(counts[lang].values()))]
+    public = sum(1 for c in commits if c.langs and not c.private)
+    private = sum(1 for c in commits if c.langs and c.private)
 
     width, row_h, top = CARD_W, 30, 90
     height = top + len(rows) * row_h + 14
-    x0, x1 = 104, width - 118
+    x0, x1 = max(104, 20 + max(len(l) for l in rows) * 6.6 + 12), width - 118
     scale = (x1 - x0) / max((sum(counts[l].values()) for l in rows), default=1)
     fills = {"public": "var(--pub)", "private": "var(--pri)"}
 
@@ -325,8 +428,8 @@ def render_visibility(commits: list[Commit], ranked: list[str]) -> str:
         body.append(stacked_segments([(pub, fills["public"]), (priv, fills["private"])],
                                      x0, scale, True, y + 2, 16))
         end = x0 + (pub + priv) * scale + 8
-        note = f" · {priv:,} private" if priv else ""
-        body.append(f'<text class="v" x="{end:.1f}" y="{y + 14}">{pub + priv:,}'
+        note = f" · {round(priv):,} private" if round(priv) else ""
+        body.append(f'<text class="v" x="{end:.1f}" y="{y + 14}">{round(pub + priv):,}'
                     f'<tspan class="m" font-weight="400">{note}</tspan></text>')
 
     subtitle = f"{public:,} public · {private:,} private commits · private names hidden"
@@ -469,7 +572,7 @@ def render_constellation(commits: list[Commit], ranked: list[str], login: str) -
         return 0.4 + play * frac
 
     def star_fill(lang: str) -> str:
-        return f"var(--s{ranked.index(lang)})" if lang in ranked else "var(--so)"
+        return color(lang, ranked)
 
     body = []
     for i in range(50):  # faint background dust
@@ -634,14 +737,18 @@ def main() -> None:
     repos = [r for r in fetch_repos(token) if r["nameWithOwner"].lower() != profile_repo]  # config, not a project
     owned = [r for r in repos if not r["isFork"]
              and r["nameWithOwner"].split("/", 1)[0].lower() == viewer["login"].lower()]
-    commits = fetch_commits(token, repos, viewer["id"])
+    commits = attach_file_languages(token, fetch_commits(token, repos, viewer["id"]))
     ranked = rank_languages(commits)
+    # Repo-level cards can show languages outside the commit top 6; give them colors too.
+    repo_langs = Counter((r["primaryLanguage"] or {}).get("name") for r in repos)
+    extra = [l for l, _ in repo_langs.most_common() if l and l not in ranked]
+    color_langs = (ranked + extra)[:len(PALETTE_LIGHT)]
     cards = {
         "language-journey.svg": render_journey(commits, ranked),
         "commit-visibility.svg": render_visibility(commits, ranked),
-        "active-repos.svg": render_active(commits, ranked),
-        "repo-constellation.svg": render_constellation(commits, ranked, viewer["login"]),
-        "repo-languages.svg": render_repo_languages(owned, ranked),
+        "active-repos.svg": render_active(commits, color_langs),
+        "repo-constellation.svg": render_constellation(commits, color_langs, viewer["login"]),
+        "repo-languages.svg": render_repo_languages(owned, color_langs),
     }
     for filename, svg in cards.items():
         (out_dir / filename).write_text(svg, encoding="utf-8")

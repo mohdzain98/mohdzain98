@@ -17,6 +17,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Per-commit file languages, so only new commits hit the API.
+      # Kept in the Actions cache, not committed to this public repo.
+      - name: Restore commit-language cache
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: commit-langs-${{ github.run_id }}
+          restore-keys: commit-langs-
+
       # Needs a token with `repo` scope so private repos are counted
       # (only totals are rendered; private repo names never appear).
       - name: Generate cards
