@@ -2,7 +2,7 @@
 
 Collects every commit authored by the token owner across owned, collaborator
 and organization repos (deduplicated by oid, so forks never double count), then
-renders cards: language journey, visibility, active repos, repo constellation.
+renders cards: language journey, visibility, active repos, constellation, code.
 Run by the profile-cards workflow; private repo names never appear in output.
 """
 
@@ -19,13 +19,15 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field, replace
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from html import escape
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 API_URL = "https://api.github.com/graphql"
 REST_URL = "https://api.github.com"
-CACHE_PATH = Path(os.environ.get("COMMIT_LANG_CACHE", ".cache/commit-languages.json"))
+CACHE_PATH = Path(os.environ.get("COMMIT_LANG_CACHE", ".cache/commit-lines.json"))
+LOCAL_TZ = ZoneInfo(os.environ.get("CARDS_TIMEZONE", "Asia/Kolkata"))  # for streak days
 
 # File extension -> Linguist language name, for per-commit language attribution.
 EXT_LANG = {
@@ -43,6 +45,9 @@ EXT_LANG = {
 NAME_LANG = {"Dockerfile": "Dockerfile", "Makefile": "Makefile"}
 # Languages left out of the commit-based cards entirely.
 IGNORED_LANGS = {"CSS", "PHP"}
+# Code card: markup/config languages left out, matching the old metrics card settings.
+SIZE_IGNORED = {"Jupyter Notebook", "HTML", "CSS", "TeX", "Less", "SCSS", "Sass", "Dockerfile",
+                "Makefile", "QMake", "Lex", "CMake", "Shell", "Gnuplot", "Hack", "PHP", "Mermaid"}
 SKIP_PATH_PARTS = ("node_modules/", "vendor/", "dist/", "build/", ".next/", "site-packages/", ".min.")
 ACTIVE_DAYS = 90
 MAX_LANGS = 6
@@ -66,7 +71,8 @@ query($cursor: String) {
       affiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER],
       ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
       pageInfo { hasNextPage endCursor }
-      nodes { nameWithOwner isPrivate isFork primaryLanguage { name } }
+      nodes { nameWithOwner isPrivate isFork primaryLanguage { name }
+              languages(first: 30) { edges { size node { name } } } }
     }
   }
 }"""
@@ -98,6 +104,7 @@ class Commit:
     language: str
     private: bool
     langs: dict[str, float] = field(default_factory=dict)
+    lines: dict[str, list[int]] = field(default_factory=dict)  # lang -> [added, deleted]
 
 
 def graphql(token: str, query: str, variables: dict | None = None) -> dict:
@@ -172,8 +179,8 @@ def file_language(path: str) -> str | None:
     return EXT_LANG.get(os.path.splitext(name)[1].lower())
 
 
-def commit_file_languages(token: str, repo: str, oid: str) -> dict[str, float] | None:
-    """Split one commit across languages, weighted by lines changed per file.
+def commit_file_languages(token: str, repo: str, oid: str) -> dict[str, list[int]] | None:
+    """Lines changed per language in one commit: {lang: [added, deleted, files]}.
 
     Returns {} when no code file changed, or None on an API error (not cached).
     """
@@ -187,13 +194,22 @@ def commit_file_languages(token: str, repo: str, oid: str) -> dict[str, float] |
             files = json.load(resp).get("files", [])
     except (urllib.error.URLError, TimeoutError):
         return None
-    weights: Counter = Counter()
+    stats: dict[str, list[int]] = {}
     for f in files:
         lang = file_language(f["filename"])
         if lang:
-            weights[lang] += max(f.get("additions", 0) + f.get("deletions", 0), 1)
-    total = sum(weights.values())
-    return {lang: w / total for lang, w in weights.items()} if total else {}
+            row = stats.setdefault(lang, [0, 0, 0])
+            row[0] += f.get("additions", 0)
+            row[1] += f.get("deletions", 0)
+            row[2] += 1
+    return stats
+
+
+def line_weights(stats: dict[str, list[int]]) -> dict[str, float]:
+    """Turn per-language line stats into weights summing to 1 (by lines, else files)."""
+    raw = {lang: (a + d) or n for lang, (a, d, n) in stats.items()}
+    total = sum(raw.values())
+    return {lang: w / total for lang, w in raw.items()} if total else {}
 
 
 def attach_file_languages(token: str, commits: list[Commit]) -> list[Commit]:
@@ -202,7 +218,7 @@ def attach_file_languages(token: str, commits: list[Commit]) -> list[Commit]:
     Commits without code changes fall back to the repo language; ignored languages
     are removed, so a CSS/PHP-only commit ends up with no languages at all.
     """
-    cache: dict[str, dict[str, float]] = {}
+    cache: dict[str, dict[str, list[int]]] = {}
     if CACHE_PATH.exists():
         cache = json.loads(CACHE_PATH.read_text())
     missing = [c for c in commits if c.oid not in cache]
@@ -214,7 +230,12 @@ def attach_file_languages(token: str, commits: list[Commit]) -> list[Commit]:
     CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
     CACHE_PATH.write_text(json.dumps(cache, separators=(",", ":")))
     print(f"File languages: {len(missing):,} fetched, {len(commits) - len(missing):,} from cache")
-    return [replace(c, langs=without_ignored(cache.get(c.oid) or {c.language: 1.0})) for c in commits]
+    out = []
+    for c in commits:
+        stats = cache.get(c.oid) or {}
+        weights = line_weights(stats) or {c.language: 1.0}
+        out.append(replace(c, langs=without_ignored(weights), lines={l: v[:2] for l, v in stats.items()}))
+    return out
 
 
 def without_ignored(langs: dict[str, float]) -> dict[str, float]:
@@ -724,6 +745,109 @@ def render_repo_languages(owned: list[dict], ranked: list[str]) -> str:
     subtitle = f"Top 5 · {n_repos} own repos · public | private · forks excluded"
     return frame(width, height, "Top Languages by Repo", subtitle, "".join(slices + labels))
 
+def fmt_bytes(n: float) -> str:
+    """Decimal size like GitHub's language bar: 661 kB, 3.26 MB."""
+    for unit, scale in (("MB", 1e6), ("kB", 1e3)):
+        if n >= scale:
+            return f"{n / scale:.2f} {unit}" if n < 10 * scale else f"{n / scale:.1f} {unit}"
+    return f"{int(n)} B"
+
+
+def fmt_lines(n: int) -> str:
+    """Compact line count: 950, 12.4k, 1.2M."""
+    if n >= 1_000_000:
+        return f"{n / 1e6:.1f}M"
+    return f"{n / 1e3:.1f}k" if n >= 1000 else str(n)
+
+
+def best_streak(commits: list[Commit]) -> tuple[int, date | None, date | None]:
+    """Longest run of consecutive local days with at least one commit.
+
+    Returns (length, first day, last day); (0, None, None) with no commits.
+    """
+    days = sorted({c.when.astimezone(LOCAL_TZ).date() for c in commits})
+    best, start, run_start = (0, None, None), None, None
+    for i, d in enumerate(days):
+        if i == 0 or (d - days[i - 1]).days != 1:
+            run_start = d
+        length = (d - run_start).days + 1
+        if length > best[0]:
+            best = (length, run_start, d)
+    return best
+
+
+def render_code(owned: list[dict], commits: list[Commit], ranked: list[str]) -> str:
+    """Code by language: repo size bar, per-language size and lines written, best streak.
+
+    Size comes from Linguist bytes in owned repos (no forks); lines written are
+    the additions/deletions in the user's own commits across every repo.
+    """
+    size: Counter = Counter()
+    all_langs: set[str] = set()
+    for repo in owned:
+        for edge in repo["languages"]["edges"]:
+            all_langs.add(edge["node"]["name"])
+            if edge["node"]["name"] not in SIZE_IGNORED:
+                size[edge["node"]["name"]] += edge["size"]
+    added: Counter = Counter()
+    deleted: Counter = Counter()
+    for c in commits:
+        for lang, (a, d) in c.lines.items():
+            if lang not in SIZE_IGNORED:
+                added[lang] += a
+                deleted[lang] += d
+
+    total_size = sum(size.values()) or 1
+    top = [lang for lang, n in size.most_common(5) if n / total_size >= 0.01]  # skip trace languages
+    width, height = CARD_W, 298
+    subtitle = (f"{fmt_bytes(total_size)} · {len(all_langs)} languages · "
+                f"{fmt_lines(sum(added.values()))} lines written")
+    body = []
+
+    # Size bar: top languages + Other, 2px gaps, rounded ends.
+    x, bar_w, y = 20.0, width - 40, 64
+    segs = [(size[l], color(l, ranked)) for l in top]
+    rest = total_size - sum(size[l] for l in top)
+    if rest > 0:
+        segs.append((rest, "var(--so)"))
+    body.append(f'<clipPath id="bar"><rect x="20" y="{y}" width="{bar_w}" height="10" rx="5"/></clipPath>'
+                f'<g clip-path="url(#bar)">')
+    live = [s for s in segs if s[0] / total_size * bar_w >= 0.5]
+    for i, (value, fill) in enumerate(live):
+        w = value / total_size * bar_w
+        gap = 0 if i == len(live) - 1 else GAP
+        body.append(f'<rect x="{x:.1f}" y="{y}" width="{max(w - gap, 0.5):.1f}" height="10" style="fill:{fill}"/>')
+        x += w
+    body.append("</g>")
+
+    head_y = 104
+    body.append(f'<text class="m" x="236" y="{head_y}" text-anchor="end">Size</text>')
+    body.append(f'<text class="m" x="{width - 20}" y="{head_y}" text-anchor="end">Lines written (+ added  − deleted)</text>')
+    rows = [(lang, size[lang], added[lang], deleted[lang], color(lang, ranked)) for lang in top]
+    rest_langs = [l for l in set(size) | set(added) if l not in top]
+    if len(rows) < 5 and rest_langs:
+        rows.append(("Other", sum(size[l] for l in rest_langs), sum(added[l] for l in rest_langs),
+                     sum(deleted[l] for l in rest_langs), "var(--so)"))
+    for i, (lang, n_bytes, n_add, n_del, fill) in enumerate(rows):
+        ry = head_y + 26 + i * 26
+        body.append(f'<circle cx="26" cy="{ry - 4}" r="5" style="fill:{fill}"/>')
+        body.append(f'<text class="l" x="38" y="{ry}">{escape(lang)}</text>')
+        body.append(f'<text class="v" x="194" y="{ry}" text-anchor="end">{fmt_bytes(n_bytes)}</text>')
+        body.append(f'<text class="m" x="236" y="{ry}" text-anchor="end">{n_bytes / total_size * 100:.1f}%</text>')
+        body.append(f'<text class="v" x="{width - 86}" y="{ry}" text-anchor="end">+{fmt_lines(n_add)}</text>')
+        body.append(f'<text class="m" x="{width - 20}" y="{ry}" text-anchor="end">−{fmt_lines(n_del)}</text>')
+
+    rule_y = head_y + 26 + 5 * 26 - 8
+    body.append(f'<line class="g" x1="20" x2="{width - 20}" y1="{rule_y}" y2="{rule_y}"/>')
+    length, first, last = best_streak(commits)
+    if length:
+        span = f"{first:%d %b %Y}" if first == last else f"{first:%d %b} – {last:%d %b %Y}"
+        body.append(f'<text class="l" x="20" y="{rule_y + 24}">Best streak '
+                    f'<tspan class="v" font-size="13">{length} days</tspan>'
+                    f'<tspan class="m"> · {span}</tspan></text>')
+    return frame(width, height, "Code by Language", subtitle, "".join(body))
+
+
 def main() -> None:
     """Fetch repos and commits once, then write every card to the output directory."""
     token = os.environ.get("GH_STATS_TOKEN") or os.environ.get("GITHUB_TOKEN")
@@ -749,6 +873,7 @@ def main() -> None:
         "active-repos.svg": render_active(commits, color_langs),
         "repo-constellation.svg": render_constellation(commits, color_langs, viewer["login"]),
         "repo-languages.svg": render_repo_languages(owned, color_langs),
+        "code-languages.svg": render_code(owned, commits, color_langs),
     }
     for filename, svg in cards.items():
         (out_dir / filename).write_text(svg, encoding="utf-8")

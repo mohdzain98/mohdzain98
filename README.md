@@ -75,7 +75,7 @@
   <img src="./cards/commit-visibility.svg" width="49%" align="top" alt="Public vs private commits by language" />
 </p>
 <p align="left">
-  <img src="./metrics.svg" width="49%" align="top" alt="Repository size based metrics" title="Repository size based" />
+  <img src="./cards/code-languages.svg" width="49%" align="top" alt="Code by language: size and lines written per language, best streak" />
   <img src="./cards/active-repos.svg" width="49%" align="top" alt="Most active repos in the last 90 days" />
 </p>
 <p align="left">
